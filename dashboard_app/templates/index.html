@@ -1,0 +1,250 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusFi - Crypto Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 1. Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span>NexusFi</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="#">Markets</a></li>
+                <li><a href="#">Portfolio</a></li>
+                <li><a href="#">Analytics</a></li>
+            </ul>
+            <button class="btn-primary">Connect Wallet</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- 2. Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Track Your Crypto<br>Portfolio in <span class="text-gradient">Real-Time</span></h1>
+                <p class="hero-subtitle">Advanced analytics, deep market insights, and real-time portfolio tracking all in one premium dashboard.</p>
+                <div class="hero-actions">
+                    <button class="btn-primary glow">Deposit Funds</button>
+                    <button class="btn-secondary">View Analytics</button>
+                </div>
+            </div>
+            <div class="hero-graphic glass-panel">
+                <div class="hero-balance">
+                    <span class="label">Total Balance</span>
+                    <h2 class="balance-value">$124,592.80</h2>
+                    <span class="change positive">+12.4% (24h)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Dashboard Cards Section -->
+        <section class="dashboard-cards">
+            <div class="card glass-panel hover-glow">
+                <div class="card-header">
+                    <span class="card-title">Total Balance</span>
+                    <div class="icon-wrapper blue">TB</div>
+                </div>
+                <h3 class="card-value">$124,592.80</h3>
+                <p class="card-trend positive">+ $2,450.00</p>
+            </div>
+            <div class="card glass-panel hover-glow">
+                <div class="card-header">
+                    <span class="card-title">Profit / Loss</span>
+                    <div class="icon-wrapper purple">P/L</div>
+                </div>
+                <h3 class="card-value">+$18,240.50</h3>
+                <p class="card-trend positive">+ 14.5% All time</p>
+            </div>
+            <div class="card glass-panel hover-glow">
+                <div class="card-header">
+                    <span class="card-title">Active Assets</span>
+                    <div class="icon-wrapper blue">AA</div>
+                </div>
+                <h3 class="card-value">12 Coins</h3>
+                <p class="card-trend neutral">Stable across markets</p>
+            </div>
+            <div class="card glass-panel hover-glow">
+                <div class="card-header">
+                    <span class="card-title">Market Trend</span>
+                    <div class="icon-wrapper purple">MT</div>
+                </div>
+                <h3 class="card-value">Bullish</h3>
+                <p class="card-trend positive">Global cap up 2.4%</p>
+            </div>
+        </section>
+
+        <!-- 4. & 5. Analytics & Portfolio Sections -->
+        <div class="grid-2-col">
+            <!-- Analytics Section (Chart) -->
+            <section class="analytics glass-panel">
+                <div class="section-header">
+                    <h2>Portfolio Analytics</h2>
+                    <select class="dropdown">
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                        <option>All Time</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="portfolioChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Portfolio Table Section -->
+            <section class="portfolio glass-panel">
+                <div class="section-header">
+                    <h2>Your Assets</h2>
+                    <button class="btn-text">View All</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Price</th>
+                            <th>24h Change</th>
+                            <th>Holdings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="asset-info">
+                                    <div class="asset-icon btc"></div>
+                                    <div>
+                                        <span class="asset-name">Bitcoin</span>
+                                        <span class="asset-symbol">BTC</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$64,230.00</td>
+                            <td class="positive">+2.4%</td>
+                            <td>
+                                <div class="holdings">
+                                    <span class="holdings-fiat">$80,287.50</span>
+                                    <span class="holdings-crypto">1.25 BTC</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="asset-info">
+                                    <div class="asset-icon eth"></div>
+                                    <div>
+                                        <span class="asset-name">Ethereum</span>
+                                        <span class="asset-symbol">ETH</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$3,450.20</td>
+                            <td class="positive">+4.1%</td>
+                            <td>
+                                <div class="holdings">
+                                    <span class="holdings-fiat">$27,601.60</span>
+                                    <span class="holdings-crypto">8.00 ETH</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="asset-info">
+                                    <div class="asset-icon sol"></div>
+                                    <div>
+                                        <span class="asset-name">Solana</span>
+                                        <span class="asset-symbol">SOL</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$145.80</td>
+                            <td class="negative">-1.2%</td>
+                            <td>
+                                <div class="holdings">
+                                    <span class="holdings-fiat">$10,935.00</span>
+                                    <span class="holdings-crypto">75.00 SOL</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="asset-info">
+                                    <div class="asset-icon dot"></div>
+                                    <div>
+                                        <span class="asset-name">Polkadot</span>
+                                        <span class="asset-symbol">DOT</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$8.40</td>
+                            <td class="positive">+0.8%</td>
+                            <td>
+                                <div class="holdings">
+                                    <span class="holdings-fiat">$5,768.70</span>
+                                    <span class="holdings-crypto">686.75 DOT</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        <!-- 6. Recent Transactions -->
+        <section class="transactions glass-panel mt-24">
+            <div class="section-header">
+                <h2>Recent Activity</h2>
+            </div>
+            <div class="transaction-list">
+                <div class="tx-item">
+                    <div class="tx-left">
+                        <div class="tx-icon received"></div>
+                        <div class="tx-details">
+                            <span class="tx-title">Received Bitcoin</span>
+                            <span class="tx-date">Today, 14:30 PM</span>
+                        </div>
+                    </div>
+                    <div class="tx-right positive">
+                        +0.05 BTC
+                    </div>
+                </div>
+                <div class="tx-item">
+                    <div class="tx-left">
+                        <div class="tx-icon sent"></div>
+                        <div class="tx-details">
+                            <span class="tx-title">Sent Ethereum</span>
+                            <span class="tx-date">Yesterday, 09:15 AM</span>
+                        </div>
+                    </div>
+                    <div class="tx-right">
+                        -1.2 ETH
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 7. Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 NexusFi. Premium Crypto Dashboard.</p>
+        <div class="footer-links">
+            <a href="#">Support</a>
+            <a href="#">Terms</a>
+            <a href="#">Privacy</a>
+        </div>
+    </footer>
+
+    <!-- Custom Script -->
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
