@@ -1,250 +1,1480 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusFi - Crypto Dashboard</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SolarSense Pro - Solar Power Tracking Dashboard</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* ==================== CSS STARTS HERE ==================== */
+        :root {
+            --bg-deep: #0a0f18;
+            --bg-card: #111827;
+            --bg-card-lighter: #1a2332;
+            --bg-card-hover: #1e2a3a;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --gold-pale: #fde68a;
+            --amber: #f97316;
+            --amber-deep: #ea580c;
+            --orange-glow: #fb923c;
+            --sun-yellow: #fcd34d;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --green-solar: #10b981;
+            --green-glow: #34d399;
+            --red-alert: #ef4444;
+            --blue-info: #3b82f6;
+            --border-subtle: #1e293b;
+            --border-gold: rgba(245, 158, 11, 0.3);
+            --glow-gold: rgba(245, 158, 11, 0.25);
+            --glow-amber: rgba(249, 115, 22, 0.2);
+            --radius-sm: 10px;
+            --radius: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow-gold: 0 0 40px rgba(245, 158, 11, 0.15);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-deep);
+            background-image:
+                radial-gradient(ellipse at 60% 10%, rgba(245, 158, 11, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(249, 115, 22, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(251, 191, 36, 0.03) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Subtle grid pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.03;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #1a1a1a;
+            box-shadow: 0 0 20px var(--glow-gold);
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px var(--glow-gold);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(245, 158, 11, 0.45);
+            }
+        }
+        .header-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .header-title span {
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--green-solar);
+            white-space: nowrap;
+        }
+        .live-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green-solar);
+            animation: livePulse 1.2s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--green-glow);
+        }
+        @keyframes livePulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(1.6);
+            }
+        }
+        .demo-tag {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gold-light);
+            white-space: nowrap;
+            animation: demoGlow 2s ease-in-out infinite;
+        }
+        @keyframes demoGlow {
+            0%,
+            100% {
+                border-color: rgba(245, 158, 11, 0.35);
+            }
+            50% {
+                border-color: rgba(245, 158, 11, 0.7);
+                box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+            }
+        }
+        .sim-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .sim-time i {
+            color: var(--gold);
+            margin-right: 4px;
+        }
+
+        /* ========== MAIN DASHBOARD GRID ========== */
+        .dashboard {
+            position: relative;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-rows: auto auto auto auto;
+            gap: 18px;
+            padding: 20px 24px 30px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* ========== CARD BASE ========== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-gold);
+            box-shadow: var(--shadow-card), var(--shadow-gold);
+            transform: translateY(-2px);
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.25), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .card:hover::after {
+            opacity: 1;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .card-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-secondary);
+        }
+        .card-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        .card-icon.gold {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--gold);
+        }
+        .card-icon.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green-solar);
+        }
+        .card-icon.blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue-info);
+        }
+        .card-icon.amber {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--amber);
+        }
+
+        /* ========== GAUGE CARD - spans 2 cols ========== */
+        .gauge-card {
+            grid-column: span 2;
+            grid-row: span 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px 16px;
+        }
+        .gauge-container {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gauge-svg {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.3));
+        }
+        .gauge-value {
+            font-size: 3.8rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            text-align: center;
+            margin-top: -20px;
+            background: linear-gradient(180deg, #fff 0%, #fcd34d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        .gauge-unit {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0;
+            -webkit-text-fill-color: var(--text-muted);
+            margin-left: 2px;
+        }
+        .gauge-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+        .gauge-range-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 280px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: -8px;
+            padding: 0 8px;
+        }
+
+        /* ========== STAT CARDS ========== */
+        .stats-col {
+            grid-column: span 1;
+            grid-row: span 2;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card:hover {
+            border-color: var(--border-gold);
+            box-shadow: var(--shadow-gold);
+            transform: translateX(3px);
+        }
+        .stat-card .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #fff;
+            line-height: 1.1;
+        }
+        .stat-card .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 2px;
+        }
+        .stat-card .stat-change {
+            font-size: 0.72rem;
+            font-weight: 600;
+            margin-top: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .stat-change.up {
+            color: var(--green-solar);
+        }
+        .stat-change.info {
+            color: var(--blue-info);
+        }
+        .stat-card .stat-icon-sm {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            font-size: 1.3rem;
+            opacity: 0.5;
+            color: var(--gold);
+        }
+        .stat-card:nth-child(1) {
+            border-left: 3px solid var(--gold);
+        }
+        .stat-card:nth-child(2) {
+            border-left: 3px solid var(--green-solar);
+        }
+        .stat-card:nth-child(3) {
+            border-left: 3px solid var(--blue-info);
+        }
+        .stat-card:nth-child(4) {
+            border-left: 3px solid var(--amber);
+        }
+
+        /* ========== DAILY CHART CARD ========== */
+        .chart-card {
+            grid-column: span 4;
+            padding: 20px 22px 16px;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 280px;
+        }
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ========== BOTTOM ROW CARDS ========== */
+        .info-card {
+            grid-column: span 1;
+            min-height: 150px;
+        }
+        .battery-bar-wrap {
+            margin-top: 8px;
+        }
+        .battery-bar-outer {
+            width: 100%;
+            height: 16px;
+            background: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .battery-bar-inner {
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.6s ease;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24, #10b981);
+            position: relative;
+        }
+        .battery-bar-inner::after {
+            content: '';
+            position: absolute;
+            right: 2px;
+            top: 3px;
+            bottom: 3px;
+            width: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            animation: batteryShine 2s ease-in-out infinite;
+        }
+        @keyframes batteryShine {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+        .battery-percent {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 6px;
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.8rem;
+        }
+        .info-row .info-val {
+            font-weight: 600;
+            color: #fff;
+        }
+        .info-row .info-lbl {
+            color: var(--text-muted);
+        }
+
+        /* Solar irradiance ring */
+        .irradiance-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        .irr-ring {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: conic-gradient(#f59e0b var(--irr-percent, 65%),
+                    #1e293b var(--irr-percent, 65%));
+            mask: radial-gradient(transparent 55%, #000 56%);
+            -webkit-mask: radial-gradient(transparent 55%, #000 56%);
+        }
+        .irr-inner {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .irr-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Grid flow indicator */
+        .flow-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 20px;
+            margin-top: 8px;
+        }
+        .flow-indicator.exporting {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--green-solar);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .flow-arrow {
+            animation: flowBounce 0.8s ease-in-out infinite;
+        }
+        @keyframes flowBounce {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(4px);
+            }
+        }
+
+        /* ========== DAY PROGRESS BAR ========== */
+        .day-progress-wrap {
+            grid-column: span 4;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 4px;
+        }
+        .day-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .day-progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24, #f97316);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+        .day-progress-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .day-progress-time {
+            font-weight: 700;
+            color: var(--gold-light);
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 12px;
+                padding: 14px 14px 20px;
+            }
+            .gauge-card {
+                grid-column: span 2;
+                grid-row: span 2;
+            }
+            .stats-col {
+                grid-column: span 1;
+                grid-row: span 2;
+            }
+            .chart-card {
+                grid-column: span 3;
+            }
+            .info-card {
+                grid-column: span 1;
+            }
+            .day-progress-wrap {
+                grid-column: span 3;
+            }
+        }
+        @media (max-width: 860px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                padding: 10px 10px 16px;
+            }
+            .gauge-card {
+                grid-column: span 2;
+                grid-row: auto;
+            }
+            .stats-col {
+                grid-column: span 2;
+                grid-row: auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .stats-col .stat-card {
+                flex: 1 1 45%;
+                min-width: 140px;
+            }
+            .chart-card {
+                grid-column: span 2;
+            }
+            .info-card {
+                grid-column: span 1;
+            }
+            .day-progress-wrap {
+                grid-column: span 2;
+            }
+            .header {
+                padding: 10px 14px;
+            }
+            .gauge-value {
+                font-size: 2.8rem;
+            }
+            .chart-wrapper {
+                height: 220px;
+            }
+        }
+        @media (max-width: 500px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .gauge-card,
+            .chart-card,
+            .info-card,
+            .stats-col,
+            .day-progress-wrap {
+                grid-column: span 1;
+            }
+            .stats-col {
+                flex-direction: column;
+            }
+            .stats-col .stat-card {
+                flex: 1 1 auto;
+            }
+            .gauge-value {
+                font-size: 2.4rem;
+            }
+            .chart-wrapper {
+                height: 200px;
+            }
+            .header-title {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a3444;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4a5e;
+        }
+    </style>
 </head>
 <body>
-    <!-- 1. Navbar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <div class="logo-icon"></div>
-                <span>NexusFi</span>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="header-logo"><i class="fas fa-sun"></i></div>
+            <div>
+                <div class="header-title">Solar<span>Sense</span> Pro</div>
+                <div class="header-subtitle">Power Tracking System</div>
             </div>
-            <ul class="nav-menu">
-                <li><a href="#" class="active">Dashboard</a></li>
-                <li><a href="#">Markets</a></li>
-                <li><a href="#">Portfolio</a></li>
-                <li><a href="#">Analytics</a></li>
-            </ul>
-            <button class="btn-primary">Connect Wallet</button>
         </div>
-    </nav>
+        <div class="header-right">
+            <span class="live-badge"><span class="live-dot"></span> LIVE</span>
+            <span class="demo-tag"><i class="fas fa-flask"></i> Demo Mode</span>
+            <span class="sim-time"><i class="far fa-clock"></i> Sim Time: <strong id="simTimeDisplay">12:30 PM</strong></span>
+        </div>
+    </header>
 
-    <main class="container">
-        <!-- 2. Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1 class="hero-title">Track Your Crypto<br>Portfolio in <span class="text-gradient">Real-Time</span></h1>
-                <p class="hero-subtitle">Advanced analytics, deep market insights, and real-time portfolio tracking all in one premium dashboard.</p>
-                <div class="hero-actions">
-                    <button class="btn-primary glow">Deposit Funds</button>
-                    <button class="btn-secondary">View Analytics</button>
-                </div>
-            </div>
-            <div class="hero-graphic glass-panel">
-                <div class="hero-balance">
-                    <span class="label">Total Balance</span>
-                    <h2 class="balance-value">$124,592.80</h2>
-                    <span class="change positive">+12.4% (24h)</span>
-                </div>
-            </div>
-        </section>
+    <!-- ==================== DASHBOARD GRID ==================== -->
+    <div class="dashboard">
 
-        <!-- 3. Dashboard Cards Section -->
-        <section class="dashboard-cards">
-            <div class="card glass-panel hover-glow">
-                <div class="card-header">
-                    <span class="card-title">Total Balance</span>
-                    <div class="icon-wrapper blue">TB</div>
+        <!-- GAUGE CARD -->
+        <div class="card gauge-card" id="gaugeCard">
+            <div class="gauge-container">
+                <svg class="gauge-svg" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background arc -->
+                    <path d="M 35 185 A 140 140 0 0 1 285 185"
+                    fill="none" stroke="#1e293b" stroke-width="22" stroke-linecap="round"/>
+                    <!-- Progress arc -->
+                    <path id="gaugeArc" d="M 35 185 A 140 140 0 0 1 285 185"
+                    fill="none" stroke="url(#gaugeGradient)" stroke-width="22" stroke-linecap="round"
+                    stroke-dasharray="439.8" stroke-dashoffset="439.8"/>
+                    <!-- Gradient definition -->
+                    <defs>
+                        <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#f59e0b"/>
+                            <stop offset="40%" stop-color="#fbbf24"/>
+                            <stop offset="100%" stop-color="#f97316"/>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="blur"/>
+                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <!-- Tick marks -->
+                    <line x1="35" y1="178" x2="35" y2="192" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="97" y1="120" x2="89" y2="130" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="160" y1="100" x2="160" y2="112" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="223" y1="120" x2="231" y2="130" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="285" y1="178" x2="285" y2="192" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Center dot -->
+                    <circle cx="160" cy="170" r="5" fill="#f59e0b" filter="url(#glow)"/>
+                </svg>
+                <div class="gauge-value" id="gaugeValue">0.00<span class="gauge-unit">kW</span></div>
+                <div class="gauge-label">Current Power Output</div>
+                <div class="gauge-range-links">
+                    <span>0 kW</span><span>5 kW</span><span>10 kW</span>
                 </div>
-                <h3 class="card-value">$124,592.80</h3>
-                <p class="card-trend positive">+ $2,450.00</p>
             </div>
-            <div class="card glass-panel hover-glow">
-                <div class="card-header">
-                    <span class="card-title">Profit / Loss</span>
-                    <div class="icon-wrapper purple">P/L</div>
-                </div>
-                <h3 class="card-value">+$18,240.50</h3>
-                <p class="card-trend positive">+ 14.5% All time</p>
-            </div>
-            <div class="card glass-panel hover-glow">
-                <div class="card-header">
-                    <span class="card-title">Active Assets</span>
-                    <div class="icon-wrapper blue">AA</div>
-                </div>
-                <h3 class="card-value">12 Coins</h3>
-                <p class="card-trend neutral">Stable across markets</p>
-            </div>
-            <div class="card glass-panel hover-glow">
-                <div class="card-header">
-                    <span class="card-title">Market Trend</span>
-                    <div class="icon-wrapper purple">MT</div>
-                </div>
-                <h3 class="card-value">Bullish</h3>
-                <p class="card-trend positive">Global cap up 2.4%</p>
-            </div>
-        </section>
-
-        <!-- 4. & 5. Analytics & Portfolio Sections -->
-        <div class="grid-2-col">
-            <!-- Analytics Section (Chart) -->
-            <section class="analytics glass-panel">
-                <div class="section-header">
-                    <h2>Portfolio Analytics</h2>
-                    <select class="dropdown">
-                        <option>Last 7 Days</option>
-                        <option>Last 30 Days</option>
-                        <option>All Time</option>
-                    </select>
-                </div>
-                <div class="chart-container">
-                    <canvas id="portfolioChart"></canvas>
-                </div>
-            </section>
-
-            <!-- Portfolio Table Section -->
-            <section class="portfolio glass-panel">
-                <div class="section-header">
-                    <h2>Your Assets</h2>
-                    <button class="btn-text">View All</button>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Price</th>
-                            <th>24h Change</th>
-                            <th>Holdings</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="asset-info">
-                                    <div class="asset-icon btc"></div>
-                                    <div>
-                                        <span class="asset-name">Bitcoin</span>
-                                        <span class="asset-symbol">BTC</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>$64,230.00</td>
-                            <td class="positive">+2.4%</td>
-                            <td>
-                                <div class="holdings">
-                                    <span class="holdings-fiat">$80,287.50</span>
-                                    <span class="holdings-crypto">1.25 BTC</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="asset-info">
-                                    <div class="asset-icon eth"></div>
-                                    <div>
-                                        <span class="asset-name">Ethereum</span>
-                                        <span class="asset-symbol">ETH</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>$3,450.20</td>
-                            <td class="positive">+4.1%</td>
-                            <td>
-                                <div class="holdings">
-                                    <span class="holdings-fiat">$27,601.60</span>
-                                    <span class="holdings-crypto">8.00 ETH</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="asset-info">
-                                    <div class="asset-icon sol"></div>
-                                    <div>
-                                        <span class="asset-name">Solana</span>
-                                        <span class="asset-symbol">SOL</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>$145.80</td>
-                            <td class="negative">-1.2%</td>
-                            <td>
-                                <div class="holdings">
-                                    <span class="holdings-fiat">$10,935.00</span>
-                                    <span class="holdings-crypto">75.00 SOL</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="asset-info">
-                                    <div class="asset-icon dot"></div>
-                                    <div>
-                                        <span class="asset-name">Polkadot</span>
-                                        <span class="asset-symbol">DOT</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>$8.40</td>
-                            <td class="positive">+0.8%</td>
-                            <td>
-                                <div class="holdings">
-                                    <span class="holdings-fiat">$5,768.70</span>
-                                    <span class="holdings-crypto">686.75 DOT</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
         </div>
 
-        <!-- 6. Recent Transactions -->
-        <section class="transactions glass-panel mt-24">
-            <div class="section-header">
-                <h2>Recent Activity</h2>
+        <!-- STATS COLUMN -->
+        <div class="stats-col">
+            <div class="stat-card">
+                <span class="stat-icon-sm"><i class="fas fa-bolt"></i></span>
+                <div class="stat-value" id="dailyTotal">0.00</div>
+                <div class="stat-label">kWh Today</div>
+                <div class="stat-change up" id="dailyChange"><i class="fas fa-arrow-up"></i> +0.00 kWh</div>
             </div>
-            <div class="transaction-list">
-                <div class="tx-item">
-                    <div class="tx-left">
-                        <div class="tx-icon received"></div>
-                        <div class="tx-details">
-                            <span class="tx-title">Received Bitcoin</span>
-                            <span class="tx-date">Today, 14:30 PM</span>
-                        </div>
-                    </div>
-                    <div class="tx-right positive">
-                        +0.05 BTC
-                    </div>
-                </div>
-                <div class="tx-item">
-                    <div class="tx-left">
-                        <div class="tx-icon sent"></div>
-                        <div class="tx-details">
-                            <span class="tx-title">Sent Ethereum</span>
-                            <span class="tx-date">Yesterday, 09:15 AM</span>
-                        </div>
-                    </div>
-                    <div class="tx-right">
-                        -1.2 ETH
-                    </div>
-                </div>
+            <div class="stat-card">
+                <span class="stat-icon-sm"><i class="fas fa-mountain"></i></span>
+                <div class="stat-value" id="peakPower">0.00</div>
+                <div class="stat-label">Peak kW Today</div>
+                <div class="stat-change info"><i class="fas fa-chart-line"></i> at <span id="peakTime">--:--</span></div>
             </div>
-        </section>
-    </main>
-
-    <!-- 7. Footer -->
-    <footer class="footer">
-        <p>&copy; 2026 NexusFi. Premium Crypto Dashboard.</p>
-        <div class="footer-links">
-            <a href="#">Support</a>
-            <a href="#">Terms</a>
-            <a href="#">Privacy</a>
+            <div class="stat-card">
+                <span class="stat-icon-sm"><i class="fas fa-leaf"></i></span>
+                <div class="stat-value" id="co2Saved">0.0</div>
+                <div class="stat-label">kg CO₂ Saved</div>
+                <div class="stat-change up"><i class="fas fa-tree"></i> ~<span id="treesEquivalent">0</span> trees</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon-sm"><i class="fas fa-dollar-sign"></i></span>
+                <div class="stat-value" id="revenue">$0.00</div>
+                <div class="stat-label">Estimated Revenue</div>
+                <div class="stat-change up"><i class="fas fa-arrow-up"></i> today</div>
+            </div>
         </div>
-    </footer>
 
-    <!-- Custom Script -->
-    <script src="{% static 'js/script.js' %}"></script>
+        <!-- DAILY CHART -->
+        <div class="card chart-card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-chart-line" style="color:var(--gold);margin-right:6px;"></i>Daily Production Live</span>
+                <span style="font-size:0.7rem;color:var(--text-muted);">kW over time</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- DAY PROGRESS -->
+        <div class="day-progress-wrap">
+            <span class="day-progress-label"><i class="far fa-sun" style="color:var(--gold);"></i> Day Progress</span>
+            <div class="day-progress-bar">
+                <div class="day-progress-fill" id="dayProgressFill" style="width: 50%;"></div>
+            </div>
+            <span class="day-progress-time" id="dayProgressTime">12:30 PM</span>
+            <span class="day-progress-label" id="dayProgressPercent">50%</span>
+        </div>
+
+        <!-- BATTERY CARD -->
+        <div class="card info-card">
+            <div class="card-header">
+                <span class="card-title">🔋 Battery Status</span>
+                <span class="card-icon gold"><i class="fas fa-battery-three-quarters"></i></span>
+            </div>
+            <div class="battery-bar-wrap">
+                <div class="battery-bar-outer">
+                    <div class="battery-bar-inner" id="batteryBar" style="width: 72%;"></div>
+                </div>
+                <div class="battery-percent" id="batteryPercent">72%</div>
+            </div>
+            <div class="info-row" style="margin-top:8px;">
+                <span class="info-lbl">Status</span>
+                <span class="info-val" style="color:#10b981;" id="batteryStatus">Charging</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Est. Runtime</span>
+                <span class="info-val" id="batteryRuntime">8.5 hrs</span>
+            </div>
+        </div>
+
+        <!-- SOLAR IRRADIANCE CARD -->
+        <div class="card info-card">
+            <div class="card-header">
+                <span class="card-title">☀️ Solar Irradiance</span>
+                <span class="card-icon amber"><i class="fas fa-sun"></i></span>
+            </div>
+            <div class="irradiance-display">
+                <div class="irr-ring" id="irrRing" style="--irr-percent:65%;">
+                    <div class="irr-inner" id="irrValue">650</div>
+                </div>
+                <div>
+                    <div style="font-size:1.2rem;font-weight:700;color:#fff;" id="irrDisplay">650 W/m²</div>
+                    <div class="irr-label">Current Irradiance</div>
+                    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">
+                        Peak today: <span id="irrPeak" style="color:#fbbf24;">980 W/m²</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL TEMPERATURE CARD -->
+        <div class="card info-card">
+            <div class="card-header">
+                <span class="card-title">🌡️ Panel Temperature</span>
+                <span class="card-icon amber"><i class="fas fa-thermometer-half"></i></span>
+            </div>
+            <div style="font-size:2.4rem;font-weight:700;color:#fff;text-align:center;margin:10px 0;" id="panelTemp">
+                42<span style="font-size:1rem;">°C</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Efficiency Impact</span>
+                <span class="info-val" style="color:#f59e0b;" id="efficiencyImpact">-2.1%</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Ambient Temp</span>
+                <span class="info-val" id="ambientTemp">28°C</span>
+            </div>
+        </div>
+
+        <!-- GRID STATUS CARD -->
+        <div class="card info-card">
+            <div class="card-header">
+                <span class="card-title">⚡ Grid Connection</span>
+                <span class="card-icon green"><i class="fas fa-plug"></i></span>
+            </div>
+            <div class="flow-indicator exporting" id="gridFlowIndicator">
+                <i class="fas fa-arrow-right flow-arrow"></i>
+                <span id="gridFlowText">Exporting 3.2 kW</span>
+            </div>
+            <div class="info-row" style="margin-top:8px;">
+                <span class="info-lbl">Grid Voltage</span>
+                <span class="info-val">230 V</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Frequency</span>
+                <span class="info-val">50.0 Hz</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Total Exported Today</span>
+                <span class="info-val" id="totalExported">18.5 kWh</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // ==================== SOLAR POWER TRACKING DASHBOARD - LIVE DEMO ====================
+
+        (function() {
+            // --- DOM ELEMENTS ---
+            const gaugeArc = document.getElementById('gaugeArc');
+            const gaugeValue = document.getElementById('gaugeValue');
+            const simTimeDisplay = document.getElementById('simTimeDisplay');
+            const dailyTotalEl = document.getElementById('dailyTotal');
+            const dailyChangeEl = document.getElementById('dailyChange');
+            const peakPowerEl = document.getElementById('peakPower');
+            const peakTimeEl = document.getElementById('peakTime');
+            const co2SavedEl = document.getElementById('co2Saved');
+            const treesEquivalentEl = document.getElementById('treesEquivalent');
+            const revenueEl = document.getElementById('revenue');
+            const dayProgressFill = document.getElementById('dayProgressFill');
+            const dayProgressTime = document.getElementById('dayProgressTime');
+            const dayProgressPercent = document.getElementById('dayProgressPercent');
+            const batteryBar = document.getElementById('batteryBar');
+            const batteryPercent = document.getElementById('batteryPercent');
+            const batteryStatus = document.getElementById('batteryStatus');
+            const batteryRuntime = document.getElementById('batteryRuntime');
+            const irrRing = document.getElementById('irrRing');
+            const irrValue = document.getElementById('irrValue');
+            const irrDisplay = document.getElementById('irrDisplay');
+            const irrPeak = document.getElementById('irrPeak');
+            const panelTemp = document.getElementById('panelTemp');
+            const efficiencyImpact = document.getElementById('efficiencyImpact');
+            const ambientTemp = document.getElementById('ambientTemp');
+            const gridFlowIndicator = document.getElementById('gridFlowIndicator');
+            const gridFlowText = document.getElementById('gridFlowText');
+            const totalExported = document.getElementById('totalExported');
+
+            // --- CONSTANTS ---
+            const MAX_KW = 10; // Max gauge reading
+            const ARC_LENGTH = 439.8; // SVG arc total length (~π × 140)
+            const SIM_SPEED_FACTOR = 6; // Sim minutes per real second (full day ~2.2 min)
+            const DAY_START_HOUR = 6; // 6:00 AM
+            const DAY_END_HOUR = 19; // 7:00 PM
+            const TOTAL_DAY_MINUTES = (DAY_END_HOUR - DAY_START_HOUR) * 60; // 780 minutes
+            const CO2_PER_KWH = 0.709; // kg CO2 per kWh (average grid)
+            const REVENUE_PER_KWH = 0.12; // $ per kWh (feed-in tariff estimate)
+            const TREES_PER_KG_CO2 = 0.004; // ~1 tree absorbs 250kg CO2/year, simplified
+
+            // --- SIMULATION STATE ---
+            let simMinute = 0; // Minutes elapsed since DAY_START_HOUR (0 to TOTAL_DAY_MINUTES)
+            let dailyData = []; // Array of {minute, kw} for chart
+            let dailyTotalKWh = 0;
+            let peakKW = 0;
+            let peakKWMinute = 0;
+            let batterySOC = 55; // Start at 55% in morning
+            let irrPeakToday = 0;
+            let totalExportedKWh = 0;
+            let lastKW = 0;
+            let lastUpdateTime = Date.now();
+
+            // --- IDEAL SOLAR CURVE (bell curve peaking at solar noon ~12:30 PM) ---
+            function idealSolarKW(minuteFrom6AM) {
+                const noon = TOTAL_DAY_MINUTES / 2 + 30; // Peak at ~12:30 PM (6.5 hrs after 6AM = 390 min)
+                const sigma = 150; // Width of bell curve in minutes
+                const peakKW = 7.8; // Max ideal output in kW
+                const normalized = (minuteFrom6AM - noon) / sigma;
+                const bell = Math.exp(-0.5 * normalized * normalized);
+                // Add slight asymmetry (afternoon drop-off)
+                const asymmetry = minuteFrom6AM > noon ?
+                    1 - 0.08 * ((minuteFrom6AM - noon) / (TOTAL_DAY_MINUTES - noon)) :
+                    1;
+                let kw = peakKW * bell * asymmetry;
+                // Ensure non-negative and zero outside daylight
+                if (minuteFrom6AM < 0 || minuteFrom6AM > TOTAL_DAY_MINUTES) kw = 0;
+                if (minuteFrom6AM < 15) kw *= (minuteFrom6AM / 15); // Gentle ramp-up
+                if (minuteFrom6AM > TOTAL_DAY_MINUTES - 15) kw *= ((TOTAL_DAY_MINUTES - minuteFrom6AM) / 15);
+                return Math.max(0, kw);
+            }
+
+            // --- ADD CLOUD NOISE ---
+            function getCloudNoise(minute) {
+                // Create realistic noise with occasional cloud dips
+                const baseNoise = (Math.sin(minute * 0.07) * 0.4 +
+                    Math.sin(minute * 0.13 + 1.7) * 0.5 +
+                    Math.sin(minute * 0.037 + 3.1) * 0.7 +
+                    Math.sin(minute * 0.23 + 0.8) * 0.35);
+                // Random cloud events
+                const cloudEvent = Math.sin(minute * 0.017 + 5.2) > 0.7 ?
+                    -Math.random() * 1.8 :
+                    (Math.sin(minute * 0.019 + 2.8) > 0.75 ? -Math.random() * 1.2 : 0);
+                return baseNoise + cloudEvent;
+            }
+
+            function getActualKW(minute) {
+                const ideal = idealSolarKW(minute);
+                const noise = getCloudNoise(minute);
+                let kw = ideal + noise;
+                kw = Math.max(0, Math.min(MAX_KW, kw));
+                // Round to 2 decimals
+                return Math.round(kw * 100) / 100;
+            }
+
+            // --- FORMAT TIME ---
+            function formatSimTime(minuteFrom6AM) {
+                const totalMinutes = DAY_START_HOUR * 60 + minuteFrom6AM;
+                const hours = Math.floor(totalMinutes / 60);
+                const mins = Math.floor(totalMinutes % 60);
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+                return `${displayHours}:${mins.toString().padStart(2, '0')} ${ampm}`;
+            }
+
+            function formatHourMinute(minuteFrom6AM) {
+                const totalMinutes = DAY_START_HOUR * 60 + minuteFrom6AM;
+                const hours = Math.floor(totalMinutes / 60);
+                const mins = Math.floor(totalMinutes % 60);
+                return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+            }
+
+            // --- UPDATE GAUGE ---
+            function updateGauge(kw) {
+                const fraction = Math.min(1, Math.max(0, kw / MAX_KW));
+                const offset = ARC_LENGTH * (1 - fraction);
+                gaugeArc.setAttribute('stroke-dashoffset', offset);
+                gaugeValue.innerHTML = `${kw.toFixed(2)}<span class="gauge-unit">kW</span>`;
+            }
+
+            // --- UPDATE IRRADIANCE RING ---
+            function updateIrradianceRing(wPerM2) {
+                const percent = Math.min(100, Math.max(0, (wPerM2 / 1000) * 100));
+                irrRing.style.setProperty('--irr-percent', percent + '%');
+                irrValue.textContent = Math.round(wPerM2);
+                irrDisplay.textContent = Math.round(wPerM2) + ' W/m²';
+            }
+
+            // --- INITIALIZE CHART ---
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            const chartDataPoints = 78; // One point per 10 minutes over 13 hours
+            const chartLabels = [];
+            const chartIdealData = [];
+            const chartActualData = [];
+
+            for (let i = 0; i <= chartDataPoints; i++) {
+                const minute = (i / chartDataPoints) * TOTAL_DAY_MINUTES;
+                chartLabels.push(formatHourMinute(minute));
+                chartIdealData.push(parseFloat(idealSolarKW(minute).toFixed(2)));
+                chartActualData.push(null); // Will fill as simulation runs
+            }
+
+            // Pre-fill actual data up to current sim minute
+            function updateChartDataArray() {
+                for (let i = 0; i <= chartDataPoints; i++) {
+                    const minute = (i / chartDataPoints) * TOTAL_DAY_MINUTES;
+                    if (minute <= simMinute) {
+                        // Find or compute actual KW for this minute
+                        const existing = dailyData.find(d => Math.abs(d.minute - minute) < 5);
+                        if (existing) {
+                            chartActualData[i] = existing.kw;
+                        } else if (minute <= simMinute) {
+                            const kw = getActualKW(minute);
+                            chartActualData[i] = kw;
+                        } else {
+                            chartActualData[i] = null;
+                        }
+                    } else {
+                        chartActualData[i] = null;
+                    }
+                }
+                // Ensure current point is set
+                const currentIdx = Math.round((simMinute / TOTAL_DAY_MINUTES) * chartDataPoints);
+                if (currentIdx >= 0 && currentIdx <= chartDataPoints) {
+                    chartActualData[currentIdx] = lastKW;
+                }
+            }
+
+            const dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Ideal Curve (Reference)',
+                        data: chartIdealData,
+                        borderColor: 'rgba(245, 158, 11, 0.35)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 1.5,
+                        borderDash: [8, 6],
+                        pointRadius: 0,
+                        tension: 0.4,
+                        order: 2,
+                    }, {
+                        label: 'Actual Production',
+                        data: chartActualData,
+                        borderColor: '#fbbf24',
+                        backgroundColor: (context) => {
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+                            gradient.addColorStop(0, 'rgba(251, 191, 36, 0.35)');
+                            gradient.addColorStop(0.6, 'rgba(249, 115, 22, 0.10)');
+                            gradient.addColorStop(1, 'rgba(249, 115, 22, 0.0)');
+                            return gradient;
+                        },
+                        fill: true,
+                        borderWidth: 2.5,
+                        pointRadius: 1.5,
+                        pointBackgroundColor: '#fbbf24',
+                        pointBorderColor: '#fbbf24',
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#fff',
+                        tension: 0.35,
+                        order: 1,
+                        spanGaps: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#94a3b8',
+                                usePointStyle: true,
+                                pointStyleWidth: 8,
+                                padding: 20,
+                                font: { size: 11 },
+                                boxWidth: 12,
+                            },
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#fbbf24',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(245, 158, 11, 0.4)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(ctx) {
+                                    if (ctx.parsed.y === null || ctx.parsed.y === undefined) return '';
+                                    return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + ' kW';
+                                }
+                            }
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time of Day',
+                                color: '#64748b',
+                                font: { size: 11 },
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                maxTicksLimit: 14,
+                                font: { size: 10 },
+                                callback: function(val, index) {
+                                    // Show every ~2 hours
+                                    const labels = chartLabels;
+                                    const idx = Math.round(val);
+                                    if (idx >= 0 && idx < labels.length && idx % Math.ceil(labels.length /
+                                            14) === 0) {
+                                        return labels[idx];
+                                    }
+                                    return '';
+                                },
+                            },
+                            grid: { color: 'rgba(255,255,255,0.04)' },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Power (kW)',
+                                color: '#64748b',
+                                font: { size: 11 },
+                            },
+                            min: 0,
+                            max: MAX_KW,
+                            ticks: {
+                                color: '#64748b',
+                                stepSize: 2,
+                                font: { size: 10 },
+                                callback: function(v) { return v + ' kW'; },
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                        },
+                    },
+                },
+            });
+
+            // --- SIMULATION LOOP ---
+            function simulateStep() {
+                const now = Date.now();
+                const realElapsed = (now - lastUpdateTime) / 1000; // seconds
+                lastUpdateTime = now;
+
+                // Advance simulation time
+                const simAdvance = realElapsed * SIM_SPEED_FACTOR; // minutes advanced
+                simMinute += simAdvance;
+
+                // Check for day cycle reset
+                if (simMinute >= TOTAL_DAY_MINUTES) {
+                    simMinute = TOTAL_DAY_MINUTES;
+                    // Reset after a brief pause at end of day
+                    if (simMinute >= TOTAL_DAY_MINUTES + 30) {
+                        resetSimulation();
+                        return;
+                    }
+                }
+                if (simMinute > TOTAL_DAY_MINUTES) {
+                    // Day is over, hold at zero
+                    simMinute = Math.min(simMinute, TOTAL_DAY_MINUTES + 30);
+                    if (simMinute >= TOTAL_DAY_MINUTES + 30) {
+                        resetSimulation();
+                        return;
+                    }
+                    lastKW = 0;
+                    updateAllDisplays(0);
+                    return;
+                }
+
+                // Get current KW
+                const kw = getActualKW(simMinute);
+                lastKW = kw;
+
+                // Track daily data
+                const existingIdx = dailyData.findIndex(d => Math.abs(d.minute - simMinute) < 3);
+                if (existingIdx >= 0) {
+                    dailyData[existingIdx].kw = Math.max(dailyData[existingIdx].kw, kw);
+                } else {
+                    dailyData.push({ minute: simMinute, kw: kw });
+                }
+
+                // Update cumulative total
+                if (dailyData.length >= 2) {
+                    const sorted = [...dailyData].sort((a, b) => a.minute - b.minute);
+                    dailyTotalKWh = 0;
+                    for (let i = 1; i < sorted.length; i++) {
+                        const avgKW = (sorted[i].kw + sorted[i - 1].kw) / 2;
+                        const deltaHours = (sorted[i].minute - sorted[i - 1].minute) / 60;
+                        dailyTotalKWh += avgKW * deltaHours;
+                    }
+                    dailyTotalKWh = Math.round(dailyTotalKWh * 100) / 100;
+                }
+
+                // Track peak
+                if (kw > peakKW) {
+                    peakKW = kw;
+                    peakKWMinute = simMinute;
+                }
+
+                // Irradiance (correlated with KW)
+                const irradiance = Math.round(kw / MAX_KW * 1000 + (Math.random() - 0.5) * 60);
+                const irrClamped = Math.max(0, Math.min(1000, irradiance));
+                if (irrClamped > irrPeakToday) irrPeakToday = irrClamped;
+
+                // Battery simulation
+                const batteryChargeRate = kw > 0.5 ? (kw * 1.5) : (kw > 0 ? kw * 0.8 : -0.3);
+                batterySOC = Math.min(98, Math.max(15, batterySOC + batteryChargeRate * (realElapsed / 3600) * 8));
+                batterySOC = Math.round(batterySOC * 10) / 10;
+
+                // Grid export
+                const consumption = 0.6 + Math.random() * 0.4; // Household consumption ~0.6-1.0 kW
+                const netExport = kw - consumption - (batterySOC < 95 ? batteryChargeRate * 0.3 : 0);
+                const exporting = netExport > 0;
+                const exportKW = exporting ? Math.max(0, netExport) : 0;
+                totalExportedKWh += exportKW * (realElapsed / 3600);
+                totalExportedKWh = Math.round(totalExportedKWh * 100) / 100;
+
+                // Panel temperature
+                const pTemp = Math.round(25 + irradiance * 0.025 + (Math.random() - 0.5) * 2);
+                const aTemp = Math.round(20 + irradiance * 0.008 + (Math.random() - 0.5) * 1.5);
+                const effImpact = -Math.round((pTemp - 25) * 0.35 * 10) / 10;
+
+                // Update all displays
+                updateAllDisplays(kw, irrClamped, pTemp, aTemp, effImpact, exporting, exportKW);
+
+                // Update chart
+                updateChartDataArray();
+                dailyChart.data.datasets[1].data = [...chartActualData];
+                dailyChart.update('none');
+            }
+
+            function updateAllDisplays(kw, irrClamped, pTemp, aTemp, effImpact, exporting, exportKW) {
+                // Gauge
+                updateGauge(kw);
+
+                // Time
+                simTimeDisplay.textContent = formatSimTime(Math.min(simMinute, TOTAL_DAY_MINUTES));
+
+                // Stats
+                dailyTotalEl.textContent = dailyTotalKWh.toFixed(2);
+                const recentChange = kw * (1 / 60) * 5; // Approx kWh added in last 5 min
+                dailyChangeEl.innerHTML =
+                    `<i class="fas fa-arrow-up"></i> +${recentChange.toFixed(2)} kWh`;
+                peakPowerEl.textContent = peakKW.toFixed(2);
+                peakTimeEl.textContent = formatSimTime(peakKWMinute);
+                const co2 = Math.round(dailyTotalKWh * CO2_PER_KWH * 10) / 10;
+                co2SavedEl.textContent = co2.toFixed(1);
+                treesEquivalentEl.textContent = Math.round(co2 * TREES_PER_KG_CO2 * 100);
+                revenueEl.textContent = '$' + (dailyTotalKWh * REVENUE_PER_KWH).toFixed(2);
+
+                // Day progress
+                const progressPercent = Math.min(100, Math.max(0, (simMinute / TOTAL_DAY_MINUTES) * 100));
+                dayProgressFill.style.width = progressPercent + '%';
+                dayProgressTime.textContent = formatSimTime(Math.min(simMinute, TOTAL_DAY_MINUTES));
+                dayProgressPercent.textContent = Math.round(progressPercent) + '%';
+
+                // Battery
+                batteryBar.style.width = batterySOC + '%';
+                batteryPercent.textContent = Math.round(batterySOC) + '%';
+                if (batterySOC > 90) {
+                    batteryStatus.textContent = 'Nearly Full';
+                    batteryStatus.style.color = '#10b981';
+                } else if (kw > 0.3 && batterySOC < 95) {
+                    batteryStatus.textContent = 'Charging';
+                    batteryStatus.style.color = '#fbbf24';
+                } else if (kw < 0.1) {
+                    batteryStatus.textContent = 'Discharging';
+                    batteryStatus.style.color = '#f97316';
+                } else {
+                    batteryStatus.textContent = 'Idle';
+                    batteryStatus.style.color = '#94a3b8';
+                }
+                batteryRuntime.textContent = (batterySOC * 0.12).toFixed(1) + ' hrs';
+
+                // Irradiance
+                updateIrradianceRing(irrClamped);
+                irrPeak.textContent = irrPeakToday + ' W/m²';
+
+                // Temperature
+                panelTemp.innerHTML = pTemp + '<span style="font-size:1rem;">°C</span>';
+                efficiencyImpact.textContent = effImpact.toFixed(1) + '%';
+                efficiencyImpact.style.color = effImpact < -3 ? '#ef4444' : '#f59e0b';
+                ambientTemp.textContent = aTemp + '°C';
+
+                // Grid
+                if (exporting && exportKW > 0.2) {
+                    gridFlowIndicator.className = 'flow-indicator exporting';
+                    gridFlowText.textContent = 'Exporting ' + exportKW.toFixed(1) + ' kW';
+                } else if (exportKW < -0.1) {
+                    gridFlowIndicator.className = 'flow-indicator';
+                    gridFlowIndicator.style.background = 'rgba(239,68,68,0.12)';
+                    gridFlowIndicator.style.color = '#ef4444';
+                    gridFlowIndicator.style.border = '1px solid rgba(239,68,68,0.3)';
+                    gridFlowText.textContent = 'Importing ' + Math.abs(exportKW).toFixed(1) + ' kW';
+                } else {
+                    gridFlowIndicator.className = 'flow-indicator';
+                    gridFlowIndicator.style.background = 'rgba(148,163,184,0.1)';
+                    gridFlowIndicator.style.color = '#94a3b8';
+                    gridFlowIndicator.style.border = '1px solid rgba(148,163,184,0.2)';
+                    gridFlowText.textContent = 'Balanced';
+                }
+                totalExported.textContent = totalExportedKWh.toFixed(1) + ' kWh';
+            }
+
+            function resetSimulation() {
+                simMinute = 0;
+                dailyData = [];
+                dailyTotalKWh = 0;
+                peakKW = 0;
+                peakKWMinute = 0;
+                batterySOC = 55;
+                irrPeakToday = 0;
+                totalExportedKWh = 0;
+                lastKW = 0;
+                for (let i = 0; i < chartActualData.length; i++) {
+                    chartActualData[i] = null;
+                }
+                dailyChart.data.datasets[1].data = [...chartActualData];
+                dailyChart.update('none');
+                updateGauge(0);
+                updateIrradianceRing(0);
+                simTimeDisplay.textContent = formatSimTime(0);
+                dailyTotalEl.textContent = '0.00';
+                dailyChangeEl.innerHTML = '<i class="fas fa-arrow-up"></i> +0.00 kWh';
+                peakPowerEl.textContent = '0.00';
+                peakTimeEl.textContent = '--:--';
+                co2SavedEl.textContent = '0.0';
+                treesEquivalentEl.textContent = '0';
+                revenueEl.textContent = '$0.00';
+                dayProgressFill.style.width = '0%';
+                dayProgressTime.textContent = formatSimTime(0);
+                dayProgressPercent.textContent = '0%';
+                batteryBar.style.width = '55%';
+                batteryPercent.textContent = '55%';
+                batteryStatus.textContent = 'Charging';
+                batteryStatus.style.color = '#fbbf24';
+                batteryRuntime.textContent = '6.6 hrs';
+                panelTemp.innerHTML = '25<span style="font-size:1rem;">°C</span>';
+                efficiencyImpact.textContent = '0.0%';
+                efficiencyImpact.style.color = '#f59e0b';
+                ambientTemp.textContent = '20°C';
+                irrPeak.textContent = '0 W/m²';
+                gridFlowIndicator.className = 'flow-indicator';
+                gridFlowIndicator.style.background = 'rgba(148,163,184,0.1)';
+                gridFlowIndicator.style.color = '#94a3b8';
+                gridFlowIndicator.style.border = '1px solid rgba(148,163,184,0.2)';
+                gridFlowText.textContent = 'Waiting for sunrise...';
+                totalExported.textContent = '0.0 kWh';
+            }
+
+            // --- INITIAL SETUP ---
+            function initializeDashboard() {
+                // Start at 6:30 AM for a nice demo start
+                simMinute = 30;
+                lastUpdateTime = Date.now();
+                // Pre-generate some morning data
+                for (let m = 5; m <= simMinute; m += 5) {
+                    const kw = getActualKW(m);
+                    dailyData.push({ minute: m, kw: kw });
+                }
+                // Compute initial totals
+                const sorted = [...dailyData].sort((a, b) => a.minute - b.minute);
+                dailyTotalKWh = 0;
+                for (let i = 1; i < sorted.length; i++) {
+                    const avgKW = (sorted[i].kw + sorted[i - 1].kw) / 2;
+                    const deltaHours = (sorted[i].minute - sorted[i - 1].minute) / 60;
+                    dailyTotalKWh += avgKW * deltaHours;
+                }
+                dailyTotalKWh = Math.round(dailyTotalKWh * 100) / 100;
+                peakKW = Math.max(...sorted.map(d => d.kw), 0);
+                peakKWMinute = sorted.find(d => d.kw === peakKW)?.minute || 0;
+                lastKW = getActualKW(simMinute);
+                batterySOC = 58;
+                irrPeakToday = Math.round(lastKW / MAX_KW * 1000);
+                totalExportedKWh = dailyTotalKWh * 0.65;
+
+                updateChartDataArray();
+                dailyChart.data.datasets[1].data = [...chartActualData];
+                dailyChart.update('none');
+
+                const irr = Math.round(lastKW / MAX_KW * 1000);
+                updateAllDisplays(lastKW, irr, 28, 21, -1.1, lastKW > 0.6, Math.max(0, lastKW - 0.7));
+                updateGauge(lastKW);
+                updateIrradianceRing(irr);
+                simTimeDisplay.textContent = formatSimTime(simMinute);
+            }
+
+            // --- MAIN LOOP ---
+            initializeDashboard();
+            setInterval(simulateStep, 1000); // Update every second
+
+            // --- HANDLE WINDOW RESIZE FOR CHART ---
+            window.addEventListener('resize', () => {
+                dailyChart.resize();
+            });
+
+            console.log('%c☀️ SolarSense Pro Dashboard Active %c| %cDemo Mode - Live Tracking %c| %cAll systems nominal',
+                'color:#fbbf24;font-size:14px;',
+                'color:#94a3b8;',
+                'color:#f59e0b;font-weight:bold;',
+                'color:#94a3b8;',
+                'color:#10b981;');
+            console.log('%cFeatures: Real-time gauge • Daily production chart • Battery SOC • Irradiance • Grid export • CO₂ tracking',
+                'color:#94a3b8;font-size:11px;');
+            console.log('%cSimulation: Full day cycle compresses ~13 hours into ~2 minutes. Auto-resets at sunset.',
+                'color:#64748b;font-size:10px;');
+        })();
+    </script>
 </body>
 </html>
